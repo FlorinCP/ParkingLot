@@ -2,14 +2,29 @@ package com.parking.parkinglot.servlets;
 
 import com.parking.parkinglot.common.CarDto;
 import com.parking.parkinglot.ejb.CarsBean;
+import jakarta.annotation.security.DeclareRoles;
 import jakarta.inject.Inject;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+/*
+*  @ServletSecurity - tells the server that this servlet is protected
+*  value = @HttpConstraint(rolesAllowed = {"READ_CARS"}) - tells the server that to access any method
+*  from this servlet, a user needs to have at least these usergroups
+*  httpMethodConstraints = {@HttpMethodConstraint(value = "POST", rolesAllowed = {"WRITE_CARS"})} -
+*  tells the server that to access the specific method (in this case doPost()), a user needs to have at least
+*  these usergroups
+ */
+
+@DeclareRoles({"READ_CARS", "WRITE_CARS"})
+@ServletSecurity(value = @HttpConstraint(rolesAllowed = {"READ_CARS"}),
+        httpMethodConstraints = {@HttpMethodConstraint(value = "POST", rolesAllowed =
+                {"WRITE_CARS"})})
 @WebServlet(name = "Cars", value = "/Cars")
 public class Cars extends HttpServlet {
 
@@ -25,6 +40,15 @@ public class Cars extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+       // Probabil se poate face si functional
+        String[] carsIdsAsString = request.getParameterValues("car_ids");
+        if(carsIdsAsString != null){
+            List<Long> carIds = new ArrayList<>();
+            for (String carIdsAsString :carsIdsAsString){
+                carIds.add(Long.parseLong(carIdsAsString));
+            }
+            carsBean.deleteCarsByIds(carIds);
+        }
+        response.sendRedirect(request.getContextPath()+"/Cars");
     }
 }
