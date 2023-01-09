@@ -48,4 +48,22 @@ public class Car {
     public void setOwner(User owner) {
         this.owner = owner;
     }
+
+    private CarPhoto photo;
+
+    /*
+    The cascade = CascadeType.ALL attribute specifies that if the car is deleted,
+     the photo will be deleted too.
+
+    The fetch = FetchType.LAZY attribute specifies that if a car is retrieved from the database,
+     it should be retrieved without the photo, and if the getPhoto() method is called,
+      only then retrieve the photo from the database.
+     */
+
+    @OneToOne(mappedBy = "car", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    public CarPhoto getPhoto(){return photo;}
+
+    public void setPhoto(CarPhoto photo) {
+        this.photo = photo;
+    }
 }
